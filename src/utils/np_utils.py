@@ -1,7 +1,5 @@
-import numpy as np
-from core.config import Config
-import os
 import sys
+
 sys.path.append("../../")
 from src.FLAGS_DEFINE import *
 
@@ -17,7 +15,7 @@ def cartesian_product(arrays):
 
 def convert_npy_file_to_txt_file(src, dst):
     data = np.load(src)
-    print 'data.shape =', data.shape
+    print('data.shape =', data.shape)
     shape_len = len(data.shape)
     data = data.tolist()
 
@@ -29,13 +27,15 @@ def convert_npy_file_to_txt_file(src, dst):
             for row_data in data:
                 writer.write(' '.join(['%.10f' % (i) for i in row_data]) + '\n')
 
+
 def check_order(mappings):
     count = 0
     for i in range(mappings.shape[0] - 1):
         if mappings[i] > mappings[i + 1]:
-            print i, mappings[i], mappings[i + 1]
+            print(i, mappings[i], mappings[i + 1])
             count += 1
-    print 'error-count =', count
+    print('error-count =', count)
+
 
 def check_multi_dim_data_order(data, labels=None):
     if labels is not None:
@@ -51,10 +51,11 @@ def check_multi_dim_data_order(data, labels=None):
             x_j = data[j, 0]
             y_j = data[j, 1]
             if x_i > x_j and y_i > y_j:
-                print 'i =', i, ', j =', j, data[i], data[j]
+                print('i =', i, ', j =', j, data[i], data[j])
                 flag = False
 
     return flag
+
 
 def check_split_points(data):
     flag = True
@@ -66,8 +67,7 @@ def check_split_points(data):
         data_i = data[i]
         for j in range(data_i.shape[0] - 1):
             if data_i[j] >= data_i[j + 1]:
-                print i, j, data_i[j], data_i[j + 1]
+                print(i, j, data_i[j], data_i[j + 1])
                 flag = False
-
 
     return flag

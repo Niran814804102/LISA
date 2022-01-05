@@ -1,30 +1,29 @@
-import sys
 import os
+import sys
 
 sys.path.append('../')
 
-import numpy as np
 from src.utils import FileViewer
 from src.utils.core.config import Config
 from src.utils import layout_utils
-from src.utils import np_utils
 from src.solution.LISA import LISA
 from src.solution.piecewise_linear_curve_fit import PiecewiseModel
 from src.FLAGS_DEFINE import *
-import math
 from src.solution.lattice_regression import LatticeRegression
+
 
 def query_ranges_gen(start_low, start_high, offset_low, offset_high, max_value, dim, n):
     qr_list = []
     for _ in range(n):
-        x = np.random.uniform(low=start_low, high=start_high, size=[dim*2])
+        x = np.random.uniform(low=start_low, high=start_high, size=[dim * 2])
         offset = np.random.uniform(low=offset_low, high=offset_high, size=[dim])
-        y = (x[0:dim]+offset).clip(min=start_low,max=max_value)
+        y = (x[0:dim] + offset).clip(min=start_low, max=max_value)
         x[dim:] = y
         qr_list.append(x)
 
     query_ranges = np.array(qr_list)
     return query_ranges
+
 
 def bulk_loading(raw_data, temp_dir, model_dir_init):
     sorted_data_path = os.path.join(temp_dir, Config().static_data_name)
@@ -62,7 +61,6 @@ def bulk_loading(raw_data, temp_dir, model_dir_init):
     else:
         col_split_idxes = np.load(col_split_idxes_path)
 
-
     n_models = col_split_idxes.shape[0]
     piecewise_params_dir = os.path.join(Config().models_dir, 'piecewise')
     piecewise_linear_fit_flag = my_idx.check_and_load_piecewise_models_params(piecewise_params_dir, n_models)
@@ -74,7 +72,7 @@ def bulk_loading(raw_data, temp_dir, model_dir_init):
         sigma = Config().sigma
         FileViewer.detect_and_create_dir(piecewise_params_dir)
 
-        print 'n_models =', n_models
+        print('n_models =', n_models)
         start = 0
         # for i in range(n_models - 1, 0, -1):
         for i in range(n_models):
@@ -88,13 +86,11 @@ def bulk_loading(raw_data, temp_dir, model_dir_init):
                 pm.train()
                 FileViewer.detect_and_create_dir(model_dir)
                 pm.save(model_dir)
-            print i, 'finished'
-
-
+            print(i, 'finished')
 
     build_LISA_flag = my_idx.check_and_load_params()
 
-    #----------------build LISA------------------
+    # ----------------build LISA------------------
     if build_LISA_flag == False:
         if one_dim_mappings is None:
             one_dim_mappings = np.load(one_dim_mappings_path)
@@ -132,7 +128,8 @@ def lattice_regression_preprocessing(my_idx, tau, lattice_data_dir):
     lattice_training_points = None
     knn_testing_points = None
     if flag == True:
-        if os.path.exists(lattice_nodes_path) and os.path.exists(lattice_training_points_path) and os.path.exists(knn_testing_points_path):
+        if os.path.exists(lattice_nodes_path) and os.path.exists(lattice_training_points_path) and os.path.exists(
+                knn_testing_points_path):
             lattice_nodes = np.load(lattice_nodes_path)
             lattice_training_points = np.load(lattice_training_points_path)
             knn_testing_points = np.load(knn_testing_points_path)
@@ -159,7 +156,6 @@ def lattice_regression_preprocessing(my_idx, tau, lattice_data_dir):
             np.save(knn_testing_radiuses_path, knn_testing_radiuses)
 
 
-
 def lattice_regression_train(my_idx, tau, lattice_data_dir, lattice_model_dir):
     lattice_regression_preprocessing(my_idx, tau, lattice_data_dir)
     FileViewer.detect_and_create_dir(lattice_model_dir)
@@ -169,12 +165,11 @@ def lattice_regression_train(my_idx, tau, lattice_data_dir, lattice_model_dir):
         lat_reg.save(lattice_model_dir)
 
 
-
 if __name__ == '__main__':
 
     Config()
-    print 'home_dir =', Config().home_dir
-    print 'data_dir =', Config().data_dir
+    print('home_dir =', Config().home_dir)
+    print('data_dir =', Config().data_dir)
     temp_dir = Config().data_dir
     raw_data = np.load(os.path.join(temp_dir, Config().static_data_name))
     model_dir_init = os.path.join(Config().models_dir, 'LISA_Init')
@@ -203,7 +198,7 @@ if __name__ == '__main__':
     # my_idx.set_model_dir(model_dir_AI)
     # my_idx.save()
     # total_n_pages, n_entries = my_idx.range_query(query_ranges)
-    # print '#Pages =', total_n_pages
+    # print('#Pages =', total_n_pages)
 
     # Fig 9: ---------------range query on AD-----------------------
     # my_idx.set_model_dir(model_dir_AI)
@@ -214,7 +209,7 @@ if __name__ == '__main__':
     # my_idx.set_model_dir(model_dir_AD)
     # my_idx.save()
     # total_n_pages, n_entries = my_idx.range_query(query_ranges)
-    # print '#Pages =', total_n_pages
+    # print('#Pages =', total_n_pages)
 
     # Fig 13: --------------KNN query--------------------
     my_idx = LISA()

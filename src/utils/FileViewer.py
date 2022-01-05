@@ -2,11 +2,12 @@
 import os
 import shutil
 
+
 def convert_type(x, type):
     if type == 'int':
         return int(x)
     if type == 'long':
-        return long(x)
+        return int(x)
     if type == 'float':
         return float(x)
     return x
@@ -21,6 +22,7 @@ def list_files(filepath, suffix=None, isdepth=True):
         if isdepth == False:
             break
     return files
+
 
 def get_filename_from_absolute_path(filepath, retain_suffix=True):
     res = None
@@ -48,6 +50,7 @@ def load_map(path, key_type, value_type, split_tag='\t'):
 
     return res
 
+
 def load_reverse_map(path, key_type, value_type, split_tag='\t'):
     res = {}
     for line in open(path, 'r'):
@@ -57,6 +60,7 @@ def load_reverse_map(path, key_type, value_type, split_tag='\t'):
         res[key] = value
 
     return res
+
 
 def load_list(path):
     with open(path, 'r') as reader:
@@ -76,9 +80,11 @@ def detect_and_create_dir(dir):
     if os.path.exists(dir) == False:
         os.makedirs(dir)
 
+
 def detect_and_delete_empty_dir(dir):
     if os.path.exists(dir) == True:
         os.removedirs(dir)
+
 
 def detect_and_delete_dir(dir):
     if os.path.exists(dir) == True:

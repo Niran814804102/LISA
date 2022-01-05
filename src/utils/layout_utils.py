@@ -1,5 +1,6 @@
-import numpy as np
 import math
+
+import numpy as np
 
 
 def get_split_points_and_idxes(x_data, N, max_value=None, type='data_partition'):
@@ -12,7 +13,7 @@ def get_split_points_and_idxes(x_data, N, max_value=None, type='data_partition')
     x_split_points = []
     if max_value is None:
         max_value = x_data[-1] + 0.01
-    n_every_part = x_data.shape[0] / N
+    n_every_part = int(x_data.shape[0] / N)
     n_remainder = x_data.shape[0] % N
 
     for i in range(n_remainder):
@@ -35,7 +36,6 @@ def get_split_points_and_idxes(x_data, N, max_value=None, type='data_partition')
     return np.array(x_split_points, dtype=x_data.dtype), x_split_idxes
 
 
-
 def partition(data, dim, start, end, n_parts, split_points_list, split_idxes_list, max_value_each_dim):
     part_data = data[start:end]
     one_dim_data = part_data[:, dim]
@@ -52,7 +52,8 @@ def partition(data, dim, start, end, n_parts, split_points_list, split_idxes_lis
     for i in range(split_idxes.shape[0]):
         next_dim_end = split_idxes[i]
         if dim < data.shape[1] - 2:
-            partition(data, dim + 1, next_dim_start, next_dim_end, n_parts, split_points_list, split_idxes_list, max_value_each_dim)
+            partition(data, dim + 1, next_dim_start, next_dim_end, n_parts, split_points_list, split_idxes_list,
+                      max_value_each_dim)
         next_dim_start = next_dim_end
 
 
@@ -64,7 +65,7 @@ def create_borders(split_points_list):
     all_cell_measures = np.ones(shape=[n_cells], dtype=borders.dtype)
     dim = 0
     for one_dim_split_points_list in split_points_list:
-        n_repeat = (n_cells / n_parts) / len(one_dim_split_points_list)
+        n_repeat = int((n_cells / n_parts) / len(one_dim_split_points_list))
 
         start = 0
         for split_points in one_dim_split_points_list:
@@ -89,7 +90,6 @@ def create_borders(split_points_list):
     return borders, all_cell_measures
 
 
-
 def generate_grid_cells(data, n_parts_each_dim, n_models, min_value_each_dim, max_value_each_dim, eta):
     size = data.shape[0]
     n_dim = data.shape[1]
@@ -103,7 +103,7 @@ def generate_grid_cells(data, n_parts_each_dim, n_models, min_value_each_dim, ma
     partition(data, 0, 0, size, n_parts_each_dim, split_upper_bounds_list, split_idxes_list, max_value_each_dim)
 
     borders, all_cell_measures = create_borders(split_upper_bounds_list)
-    print 'borders.shape =', borders.shape
+    print('borders.shape =', borders.shape)
 
     unsorted_one_dim_data = data[:, -1]
     sorted_idxes = np.argsort(unsorted_one_dim_data)
@@ -121,21 +121,23 @@ def generate_grid_cells(data, n_parts_each_dim, n_models, min_value_each_dim, ma
     start = 0
     max_measure = 0
     for split_idxes in second_last_split_idxes_list:
-        # print 'split_idxes.shape =', split_idxes.shape
+        # print('split_idxes.shape =', split_idxes.shape)
         for i in range(split_idxes.shape[0]):
             end = split_idxes[i]
-            # print 'start =', start, 'end =', end
+            # print('start =', start, 'end =', end)
             if end > start:
                 part_borders = borders[cell_id]
                 part_cell_measures = all_cell_measures[cell_id]
                 part_data = data[start:end]
                 part_measures = np.prod(part_data[:, 0:-1] - part_borders, axis=1) / part_cell_measures
-                # print 'haha', part_data.shape, part_measures.shape
+                # print('haha', part_data.shape, part_measures.shape)
                 tmp = part_measures.max()
                 if tmp > max_measure:
                     max_measure = tmp
                 all_cell_ids[start:end] = cell_id
-                part_mappings = (part_measures * eta) + (part_data[:,-1] / max_value_each_dim * (n_parts_each_dim - 1)) + (cell_id * n_parts_each_dim)
+                part_mappings = (part_measures * eta) + (
+                            part_data[:, -1] / max_value_each_dim * (n_parts_each_dim - 1)) + (
+                                            cell_id * n_parts_each_dim)
                 part_idxes = np.argsort(part_mappings)
                 data[start:end] = part_data[part_idxes]
                 mappings[start:end] = part_mappings[part_idxes]
@@ -176,15 +178,13 @@ def generate_grid_cells(data, n_parts_each_dim, n_models, min_value_each_dim, ma
 
     check_order(mappings)
 
-    return data, mappings, np.array(params,dtype=np.float64), all_cell_measures
-
+    return data, mappings, np.array(params, dtype=np.float64), all_cell_measures
 
 
 def check_order(mappings):
     count = 0
     for i in range(mappings.shape[0] - 1):
         if mappings[i] > mappings[i + 1]:
-            print i, mappings[i], mappings[i + 1]
+            print(i, mappings[i], mappings[i + 1])
             count += 1
-    print '**********count =', count
-
+    print('**********count =', count)
